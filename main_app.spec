@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['main_app.py'],
-             pathex=['C:\\Users\\AKulic\\Projects\\DesktopApps\\OdmorZaposlenika'],
+             pathex=['<PATH TO PROJECT>'],
              binaries=[],
              datas=[],
              hiddenimports=[],
@@ -27,7 +27,7 @@ exe = EXE(pyz,
           strip=False,
           upx=True,
           console=False,
-          icon='C:\\Users\\AKulic\\Projects\\DesktopApps\\OdmorZaposlenika\\resources\\app_calendar.ico')
+          icon='<PATH TO PROJECT>\\resources\\app_calendar.ico')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,

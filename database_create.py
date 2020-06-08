@@ -10,8 +10,8 @@ def create_connection():
         raise Exception(dbase.lastError().text())
     if not dbase.tables():
         query = QtSql.QSqlQuery()
-        zap, odmor = query_create_table()
-        if not query.exec_(zap) or not query.exec_(odmor):
+        zap, odmor, dana = query_create_table()
+        if not query.exec_(zap) or not query.exec_(odmor) or not query.exec_(dana):
             raise Exception(dbase.lastError().text())
     query = QtSql.QSqlQuery()
     if not query.exec_('PRAGMA foreign_keys = ON'):
@@ -25,7 +25,7 @@ def query_create_table():
         CREATE TABLE IF NOT EXISTS zaposlenici(
             rb      INTEGER PRIMARY KEY,
             ime     TEXT NOT NULL,
-            prezime TEXT NOT NULL,
+            prezime TEXT NOT NULL
         );""", """
         CREATE TABLE IF NOT EXISTS odmor(
             rb            INTEGER PRIMARY KEY,

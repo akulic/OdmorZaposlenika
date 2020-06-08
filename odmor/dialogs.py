@@ -1,10 +1,12 @@
 import json
-from datetime import timedelta
+import os
+from datetime import timedelta, date
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, QDate
 from PyQt5.QtGui import QIcon
 from PyQt5.QtSql import QSqlTableModel, QSqlQuery
+from pyexcelerate import Workbook
 
 
 class DialogPregledZaPeriod(QtWidgets.QDialog):
@@ -14,14 +16,14 @@ class DialogPregledZaPeriod(QtWidgets.QDialog):
         self.setWindowTitle('Pregled godišnjeg odmora')
         self.resize(840, 450)
         self.zaposlenici = {}
-        sql = """select strftime('%d.%m.%Y', o.datum), z.prezime || ' ' || z.ime as zaposlenik
+        sql = """select strftime('%d.%m.%Y.', o.datum), z.prezime || ' ' || z.ime as zaposlenik
                     from zaposlenici z left join odmor o on z.rb = o.zaposlenik_rb
                     where datum between '{}' and '{}';""".format(*[str(d) for d in period])
 
         datum_od, datum_do = period
         delta = timedelta(days=1)
         while datum_od <= datum_do:  # Kreiranje stupaca s datumom za odabrani period
-            self.zaposlenici[datum_od.strftime('%d.%m.%Y')] = []
+            self.zaposlenici[datum_od.strftime('%d.%m.%Y.')] = []
             datum_od += delta
 
         query = QSqlQuery(sql)
@@ -42,10 +44,36 @@ class DialogPregledZaPeriod(QtWidgets.QDialog):
         btn_zatvori = QtWidgets.QPushButton('Zatvori')
         btn_zatvori.clicked.connect(self.close)
 
+        btn_excel = QtWidgets.QPushButton('Izvoz u Excel')
+        btn_excel.clicked.connect(self.export_to_excel)
+
+        hbox = QtWidgets.QHBoxLayout()
+        hbox.addWidget(btn_excel)
+        hbox.addStretch()
+        hbox.addWidget(btn_zatvori)
+
         vlayout = QtWidgets.QVBoxLayout()
         vlayout.addWidget(self.table)
-        vlayout.addWidget(btn_zatvori, 0, Qt.AlignRight)
+        vlayout.addLayout(hbox)
         self.setLayout(vlayout)
+
+    def write_to_excel(self, fpath):
+        data = []
+        for key, val in self.zaposlenici.items():
+            data.append([key, *val])
+        wb = Workbook()
+        wb.new_sheet('Sheet1', data=data)
+        wb.save(fpath)
+
+    def export_to_excel(self):
+        ftype = "Excel datoteka (*.xlsx)"
+        today = str(date.today()).replace('-', '')
+        init_path = os.path.expanduser(f"~/Desktop/Godišnji_{today}.xlsx")
+        fname = QtWidgets.QFileDialog.getSaveFileName(self, 'Spremi datoteku', init_path, ftype, ftype)[0]
+        if fname:
+            if not fname.endswith('.xlsx'):
+                fname += '.xlsx'
+            self.write_to_excel(fname)
 
     @staticmethod
     def exec_dialog():
