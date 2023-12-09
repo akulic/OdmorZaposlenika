@@ -1,4 +1,4 @@
 PyExcelerate==0.9.0
-PyInstaller==3.6
+PyInstaller==5.13.1
 PyQt5==5.13.2
 PyQt5-stubs==5.13.1.5
